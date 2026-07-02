@@ -65,6 +65,15 @@ function LoginPage() {
             Log In
           </button>
         </form>
+        <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '14px' }}>
+  Don't have an account?{' '}
+  <span
+    onClick={() => window.location.href = '/register'}
+    style={{ color: '#1976d2', cursor: 'pointer', fontWeight: 'bold' }}
+  >
+    Sign up here
+  </span>
+</p>
 
         <p style={{ textAlign: 'center', marginTop: '20px', color: '#666', fontSize: '14px' }}>
           💡 Test: email: test@example.com | password: test123

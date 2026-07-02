@@ -25,6 +25,23 @@ function Dashboard() {
     }
     setLoading(false);
   };
+  const getExpiryAlert = () => {
+  const expiredCount = medicines.filter(m => m.status === 'Expired').length;
+  const expiringSoonCount = medicines.filter(m => m.status === 'Expiring Soon').length;
+
+  if (expiredCount === 0 && expiringSoonCount === 0) return null;
+
+  const parts = [];
+  if (expiredCount > 0) parts.push(`${expiredCount} expired`);
+  if (expiringSoonCount > 0) parts.push(`${expiringSoonCount} expiring soon`);
+
+  return {
+    text: `⚠️ You have ${parts.join(' and ')} medicine${(expiredCount + expiringSoonCount) > 1 ? 's' : ''}!`,
+    severity: expiredCount > 0 ? 'high' : 'medium'
+  };
+};
+
+const expiryAlert = getExpiryAlert();
 
   const handleDelete = async (id) => {
     try {
@@ -87,6 +104,38 @@ function Dashboard() {
       </header>
 
       <div style={{ padding: '30px', background: '#f5f5f5', minHeight: '100vh' }}>
+        {expiryAlert && (
+  <div style={{
+    background: expiryAlert.severity === 'high' ? '#ffebee' : '#fff3e0',
+    border: `2px solid ${expiryAlert.severity === 'high' ? '#d32f2f' : '#ff9800'}`,
+    borderRadius: '10px',
+    padding: '15px 20px',
+    marginBottom: '20px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  }}>
+    <p style={{ margin: 0, fontWeight: 'bold', color: expiryAlert.severity === 'high' ? '#d32f2f' : '#e65100', fontSize: '15px' }}>
+      {expiryAlert.text}
+    </p>
+    <button
+      onClick={() => setFilterStatus(expiryAlert.severity === 'high' ? 'Expired' : 'Expiring Soon')}
+      style={{
+        padding: '8px 16px',
+        background: expiryAlert.severity === 'high' ? '#d32f2f' : '#ff9800',
+        color: 'white',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
+        fontSize: '13px',
+        fontWeight: 'bold',
+        whiteSpace: 'nowrap'
+      }}
+    >
+      View Now
+    </button>
+  </div>
+)}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
           <h2>Your Medicines</h2>
           <button 
@@ -200,10 +249,15 @@ function Dashboard() {
                 </div>
 
                 {medicine.daysUntilExpiry !== null && (
-                  <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
-                    <strong>Days left:</strong> {medicine.daysUntilExpiry > 0 ? medicine.daysUntilExpiry : 'Expired'}
-                  </p>
-                )}
+  <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
+    <strong>Days left:</strong>{' '}
+    {medicine.daysUntilExpiry < 0
+      ? 'Expired'
+      : medicine.daysUntilExpiry === 0
+      ? 'Expires today'
+      : medicine.daysUntilExpiry}
+  </p>
+)}
               </div>
             ))}
           </div>

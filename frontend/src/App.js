@@ -4,6 +4,7 @@ import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
 import AddMedicine from './pages/AddMedicine';
 import EditMedicine from './pages/EditMedicine';
+import RegisterPage from './pages/RegisterPage';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -23,6 +24,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={isLoggedIn ? <Navigate to="/dashboard" /> : <LoginPage />} />
+        <Route path="/register" element={isLoggedIn ? <Navigate to="/dashboard" /> : <RegisterPage />} />
         <Route path="/dashboard" element={isLoggedIn ? <Dashboard /> : <Navigate to="/" />} />
         <Route path="/add-medicine" element={isLoggedIn ? <AddMedicine /> : <Navigate to="/" />} />
         <Route path="/edit-medicine/:id" element={isLoggedIn ? <EditMedicine /> : <Navigate to="/" />} />
