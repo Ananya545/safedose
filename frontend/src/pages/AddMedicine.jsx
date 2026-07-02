@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import BarcodeScanner from './BarcodeScanner';
+import { API_URL } from '../config';
 
 function AddMedicine() {
   const [formData, setFormData] = useState({
@@ -37,7 +38,7 @@ function AddMedicine() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5001/api/medicines', {
+      const response = await fetch(`${API_URL}/api/medicines`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

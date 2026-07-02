@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-
+import { API_URL } from '../config';
 function EditMedicine() {
   const { id } = useParams();
   const [formData, setFormData] = useState({
@@ -22,7 +22,7 @@ function EditMedicine() {
   const fetchMedicine = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5001/api/medicines`, {
+      const response = await fetch(`${API_URL}/api/medicines`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -58,7 +58,7 @@ function EditMedicine() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5001/api/medicines/${id}`, {
+      const response = await fetch(`${API_URL}/api/medicines/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

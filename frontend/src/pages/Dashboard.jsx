@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import usePushNotifications from '../usePushNotifications';
+import { API_URL } from '../config';
 
 function Dashboard() {
   const [medicines, setMedicines] = useState([]);
@@ -15,7 +16,7 @@ function Dashboard() {
   const fetchMedicines = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5001/api/medicines', {
+      const response = await fetch(`${API_URL}/api/medicines`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -46,7 +47,7 @@ const expiryAlert = getExpiryAlert();
   const handleDelete = async (id) => {
     try {
       const token = localStorage.getItem('token');
-      await fetch(`http://localhost:5001/api/medicines/${id}`, {
+      await fetch(`${API_URL}/api/medicines/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
