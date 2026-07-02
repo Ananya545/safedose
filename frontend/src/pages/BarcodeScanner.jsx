@@ -30,6 +30,7 @@ const BarcodeScanner = ({ onBarcodeDetected, onClose }) => {
     });
 
     return () => Quagga.stop();
+   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
