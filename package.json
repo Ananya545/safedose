@@ -1,0 +1,8 @@
+{
+  "name": "safedose",
+  "version": "1.0.0",
+  "description": "Medicine Expiry Tracking App",
+  "scripts": {
+    "dev": "concurrently \"cd backend && node server.js\" \"cd frontend && npm start\""
+  }
+}
