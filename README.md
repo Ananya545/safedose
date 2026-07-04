@@ -2,8 +2,7 @@
 
 A full-stack MERN application to help users track their medicines and get alerted before they expire. Built as a hands-on learning project covering authentication, CRUD operations, cloud deployment, and real-world debugging.
 
-**Live App:** [Add your Vercel URL here]
-**Backend API:** [Add your Render URL here]
+
 
 ---
 
