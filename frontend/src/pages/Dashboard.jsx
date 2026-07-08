@@ -85,16 +85,7 @@ const expiryAlert = getExpiryAlert();
             {subscription ? '🔔 Notifications ON' : '🔕 Enable Notifications'}
 
           </button>
-          <button 
-  onClick={() => {
-    new Notification('Test Message 🧪', {
-      body: 'Notifications are WORKING! ✅'
-    });
-  }}
-  style={{ padding: '10px 20px', background: '#4caf50', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '14px', fontWeight: 'bold', marginLeft: '10px' }}
->
-  🧪 Test Now
-</button>
+          
           <button 
             onClick={handleLogout} 
             style={{ padding: '10px 20px', background: '#d32f2f', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold' }}
