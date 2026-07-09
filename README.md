@@ -4,7 +4,8 @@ A full-stack MERN application to help users track their medicines and get alerte
 
 
 
----
+---<img width="1877" height="884" alt="Screenshot 2026-07-09 184430" src="https://github.com/user-attachments/assets/64292c0b-0327-491f-973e-1ee7f4c7a495" />
+
 
 ## ✨ Features
 
