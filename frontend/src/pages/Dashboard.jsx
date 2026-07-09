@@ -7,10 +7,19 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [userName, setUserName] = useState('');
   const { subscription, subscribeToPushNotifications } = usePushNotifications();
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good Morning';
+    if (hour < 17) return 'Good Afternoon';
+    return 'Good Evening';
+  };
 
   useEffect(() => {
     fetchMedicines();
+    fetchUserName();
   }, []);
 
   const fetchMedicines = async () => {
@@ -26,23 +35,48 @@ function Dashboard() {
     }
     setLoading(false);
   };
-  const getExpiryAlert = () => {
-  const expiredCount = medicines.filter(m => m.status === 'Expired').length;
-  const expiringSoonCount = medicines.filter(m => m.status === 'Expiring Soon').length;
 
-  if (expiredCount === 0 && expiringSoonCount === 0) return null;
-
-  const parts = [];
-  if (expiredCount > 0) parts.push(`${expiredCount} expired`);
-  if (expiringSoonCount > 0) parts.push(`${expiringSoonCount} expiring soon`);
-
-  return {
-    text: `⚠️ You have ${parts.join(' and ')} medicine${(expiredCount + expiringSoonCount) > 1 ? 's' : ''}!`,
-    severity: expiredCount > 0 ? 'high' : 'medium'
+  const fetchUserName = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_URL}/api/auth/profile`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (data.success) {
+        setUserName(data.data.name.split(' ')[0]);
+      }
+    } catch (err) {
+      console.error('Error fetching user name:', err);
+    }
   };
-};
 
-const expiryAlert = getExpiryAlert();
+  const getExpiryAlert = () => {
+    const expiredCount = medicines.filter(m => m.status === 'Expired').length;
+    const expiringSoonCount = medicines.filter(m => m.status === 'Expiring Soon').length;
+
+    if (expiredCount === 0 && expiringSoonCount === 0) return null;
+
+    const parts = [];
+    if (expiredCount > 0) parts.push(`${expiredCount} expired`);
+    if (expiringSoonCount > 0) parts.push(`${expiringSoonCount} expiring soon`);
+
+    return {
+      text: `⚠️ You have ${parts.join(' and ')} medicine${(expiredCount + expiringSoonCount) > 1 ? 's' : ''}!`,
+      severity: expiredCount > 0 ? 'high' : 'medium'
+    };
+  };
+
+  const getStats = () => {
+    const total = medicines.length;
+    const safe = medicines.filter(m => m.status === 'Safe').length;
+    const expiring = medicines.filter(m => m.status === 'Expiring Soon').length;
+    const expired = medicines.filter(m => m.status === 'Expired').length;
+    return { total, safe, expiring, expired };
+  };
+
+  const stats = getStats();
+  const expiryAlert = getExpiryAlert();
 
   const handleDelete = async (id) => {
     try {
@@ -62,7 +96,6 @@ const expiryAlert = getExpiryAlert();
     window.location.href = '/';
   };
 
-  // Filter medicines based on search and status
   const filteredMedicines = medicines.filter(medicine => {
     const matchesSearch = medicine.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          medicine.dosage.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -77,15 +110,52 @@ const expiryAlert = getExpiryAlert();
     <div>
       <header style={{ background: '#1976d2', color: 'white', padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1>💊 SafeDose Dashboard</h1>
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <button
+  onClick={() => window.location.href = '/calendar'}
+  style={{
+    width: '40px',
+    height: '40px',
+    borderRadius: '50%',
+    background: '#ffffff33',
+    border: '2px solid white',
+    color: 'white',
+    cursor: 'pointer',
+    fontSize: '18px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  }}
+  title="Expiry Calendar"
+>
+  📅
+</button>
+          <button
+            onClick={() => window.location.href = '/profile'}
+            style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              background: '#ffffff33',
+              border: '2px solid white',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: '18px',
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            title="My Profile"
+          >
+            👤
+          </button>
           <button 
             onClick={subscribeToPushNotifications}
             style={{ padding: '10px 20px', background: '#ff9800', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '14px', fontWeight: 'bold' }}
           >
             {subscription ? '🔔 Notifications ON' : '🔕 Enable Notifications'}
-
           </button>
-          
           <button 
             onClick={handleLogout} 
             style={{ padding: '10px 20px', background: '#d32f2f', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold' }}
@@ -97,39 +167,43 @@ const expiryAlert = getExpiryAlert();
 
       <div style={{ padding: '30px', background: '#f5f5f5', minHeight: '100vh' }}>
         {expiryAlert && (
-  <div style={{
-    background: expiryAlert.severity === 'high' ? '#ffebee' : '#fff3e0',
-    border: `2px solid ${expiryAlert.severity === 'high' ? '#d32f2f' : '#ff9800'}`,
-    borderRadius: '10px',
-    padding: '15px 20px',
-    marginBottom: '20px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between'
-  }}>
-    <p style={{ margin: 0, fontWeight: 'bold', color: expiryAlert.severity === 'high' ? '#d32f2f' : '#e65100', fontSize: '15px' }}>
-      {expiryAlert.text}
-    </p>
-    <button
-      onClick={() => setFilterStatus(expiryAlert.severity === 'high' ? 'Expired' : 'Expiring Soon')}
-      style={{
-        padding: '8px 16px',
-        background: expiryAlert.severity === 'high' ? '#d32f2f' : '#ff9800',
-        color: 'white',
-        border: 'none',
-        borderRadius: '5px',
-        cursor: 'pointer',
-        fontSize: '13px',
-        fontWeight: 'bold',
-        whiteSpace: 'nowrap'
-      }}
-    >
-      View Now
-    </button>
-  </div>
-)}
+          <div style={{
+            background: expiryAlert.severity === 'high' ? '#ffebee' : '#fff3e0',
+            border: `2px solid ${expiryAlert.severity === 'high' ? '#d32f2f' : '#ff9800'}`,
+            borderRadius: '10px',
+            padding: '15px 20px',
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <p style={{ margin: 0, fontWeight: 'bold', color: expiryAlert.severity === 'high' ? '#d32f2f' : '#e65100', fontSize: '15px' }}>
+              {expiryAlert.text}
+            </p>
+            <button
+              onClick={() => setFilterStatus(expiryAlert.severity === 'high' ? 'Expired' : 'Expiring Soon')}
+              style={{
+                padding: '8px 16px',
+                background: expiryAlert.severity === 'high' ? '#d32f2f' : '#ff9800',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                fontSize: '13px',
+                fontWeight: 'bold',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              View Now
+            </button>
+          </div>
+        )}
+
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-          <h2>Your Medicines</h2>
+          <div>
+            {userName && <p style={{ margin: '0 0 5px 0', color: '#666', fontSize: '15px' }}>{getGreeting()}, {userName} 👋</p>}
+            <h2 style={{ margin: 0 }}>Your Medicines</h2>
+          </div>
           <button 
             onClick={() => window.location.href = '/add-medicine'}
             style={{ padding: '12px 24px', background: '#4caf50', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold' }}
@@ -138,7 +212,27 @@ const expiryAlert = getExpiryAlert();
           </button>
         </div>
 
-        {/* Search and Filter Section */}
+        {!loading && medicines.length > 0 && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px', marginBottom: '30px' }}>
+            <div style={{ background: 'white', borderRadius: '10px', padding: '20px', textAlign: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #1976d2' }}>
+              <p style={{ margin: 0, fontSize: '13px', color: '#888', fontWeight: 'bold' }}>💊 TOTAL</p>
+              <p style={{ margin: '8px 0 0 0', fontSize: '32px', fontWeight: 'bold', color: '#1976d2' }}>{stats.total}</p>
+            </div>
+            <div style={{ background: 'white', borderRadius: '10px', padding: '20px', textAlign: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #4caf50' }}>
+              <p style={{ margin: 0, fontSize: '13px', color: '#888', fontWeight: 'bold' }}>✅ SAFE</p>
+              <p style={{ margin: '8px 0 0 0', fontSize: '32px', fontWeight: 'bold', color: '#4caf50' }}>{stats.safe}</p>
+            </div>
+            <div style={{ background: 'white', borderRadius: '10px', padding: '20px', textAlign: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #ff9800' }}>
+              <p style={{ margin: 0, fontSize: '13px', color: '#888', fontWeight: 'bold' }}>⚠️ EXPIRING</p>
+              <p style={{ margin: '8px 0 0 0', fontSize: '32px', fontWeight: 'bold', color: '#ff9800' }}>{stats.expiring}</p>
+            </div>
+            <div style={{ background: 'white', borderRadius: '10px', padding: '20px', textAlign: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #d32f2f' }}>
+              <p style={{ margin: 0, fontSize: '13px', color: '#888', fontWeight: 'bold' }}>❌ EXPIRED</p>
+              <p style={{ margin: '8px 0 0 0', fontSize: '32px', fontWeight: 'bold', color: '#d32f2f' }}>{stats.expired}</p>
+            </div>
+          </div>
+        )}
+
         <div style={{ background: 'white', padding: '20px', borderRadius: '10px', marginBottom: '30px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
             <div>
@@ -241,15 +335,15 @@ const expiryAlert = getExpiryAlert();
                 </div>
 
                 {medicine.daysUntilExpiry !== null && (
-  <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
-    <strong>Days left:</strong>{' '}
-    {medicine.daysUntilExpiry < 0
-      ? 'Expired'
-      : medicine.daysUntilExpiry === 0
-      ? 'Expires today'
-      : medicine.daysUntilExpiry}
-  </p>
-)}
+                  <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
+                    <strong>Days left:</strong>{' '}
+                    {medicine.daysUntilExpiry < 0
+                      ? 'Expired'
+                      : medicine.daysUntilExpiry === 0
+                      ? 'Expires today'
+                      : medicine.daysUntilExpiry}
+                  </p>
+                )}
               </div>
             ))}
           </div>
